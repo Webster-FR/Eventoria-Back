@@ -1,13 +1,12 @@
 import {Module} from "@nestjs/common";
 import {ConfigModule} from "@nestjs/config";
-import {MiscModule} from "./modules/misc/misc.module";
+import {VersionController} from "./version.controller";
 
 @Module({
     imports: [
         ConfigModule.forRoot({isGlobal: true}),
-        MiscModule,
     ],
-    controllers: [],
+    controllers: [VersionController],
     providers: [],
 })
-export class AppModule{}
+export class MiscModule{}
