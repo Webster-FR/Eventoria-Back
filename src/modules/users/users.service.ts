@@ -117,6 +117,39 @@ export class UsersService{
         } as UserEntity;
     }
 
+    async getUserByUsername(username: string){
+        const user = await this.prismaService.users.findUnique({
+            where: {
+                username,
+            },
+            include: {
+                user_profile: {
+                    include: {
+                        avatar: true,
+                    }
+                },
+            }
+        });
+
+        return {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            admin: user.admin,
+            verified: !!user.verified_at,
+            createdAt: user.created_at,
+            updatedAt: user.updated_at,
+            profile: {
+                displayName: user.user_profile.display_name,
+                bio: user.user_profile.bio,
+                avatarSum: user.user_profile.avatar?.sum,
+                instagram: user.user_profile.instagram,
+                facebook: user.user_profile.facebook,
+                twitter: user.user_profile.twitter,
+            } as UserProfileEntity,
+        } as UserEntity;
+    }
+
     async confirmEmail(userId: number, otp: string){
         const otpVerification = await this.prismaService.otpVerifications.findFirst({
             where: {

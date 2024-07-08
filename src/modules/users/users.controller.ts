@@ -136,4 +136,12 @@ export class UsersController{
     async openEmailDispute(@Body() body: OpenDisputeDto): Promise<EmailDisputeEntity>{
         return await this.usersService.openEmailDispute(body.otp, body.context);
     }
+
+    @Get(":username")
+    @ApiResponse({status: HttpStatus.OK, description: "User found", type: UserEntity})
+    @ApiResponse({status: HttpStatus.NOT_FOUND, description: "User not found"})
+    @ApiResponse({status: HttpStatus.BAD_REQUEST, description: "Invalid username"})
+    async getUserByUsername(@Param() params: UsernameParamDto): Promise<UserEntity>{
+        return await this.usersService.getUserByUsername(params.username);
+    }
 }
