@@ -52,4 +52,12 @@ export class UsersController{
         await this.usersService.confirmEmail(req.user.id, body.otp);
     }
 
+    @Post("email/confirm/resend")
+    @UseGuards(AuthGuard)
+    @ApiResponse({status: HttpStatus.NO_CONTENT, description: "Email confirmation resent"})
+    @ApiResponse({status: HttpStatus.UNAUTHORIZED, description: "Authentication required"})
+    async resendEmailConfirmation(@Req() req: any){
+        await this.usersService.resendEmailConfirmation(req.user.id);
+    }
+
 }
