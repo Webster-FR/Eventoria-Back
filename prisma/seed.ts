@@ -14,14 +14,14 @@ async function main(){
     let start = Date.now();
     const users = await usersFunction();
     await seed(prisma.users, users, false);
-    console.log("✅  User seed done ! (" + (Date.now() - start) + "ms)");
+    console.log("✅ User seed done ! (" + (Date.now() - start) + "ms)");
 
     start = Date.now();
     const userProfiles = await userProfilesFunction();
     await seed(prisma.userProfiles, userProfiles, true, "user_id");
-    console.log("✅  User seed done ! (" + (Date.now() - start) + "ms)");
+    console.log("✅ User profiles seed done ! (" + (Date.now() - start) + "ms)");
 
-    console.log(`\n✅  Seeding completed ! (${Date.now() - gStart}ms)`);
+    console.log(`\n✅ Seeding completed ! (${Date.now() - gStart}ms)`);
 }
 
 async function seed(table: any, data: any[], update: boolean = true, idName: string = "id"){

@@ -23,6 +23,7 @@ model Users {
   created_at   DateTime      @default(now())
   updated_at   DateTime      @updatedAt
   user_profile UserProfiles?
+  sessions     Sessions[]
 
   @@map("users")
 }
@@ -38,6 +39,16 @@ model UserProfiles {
   twitter      String?
 
   @@map("user_profiles")
+}
+
+model Sessions {
+  uuid       String   @id
+  user_id    Int
+  user       Users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_agent String
+  expires_at DateTime
+
+  @@map("sessions")
 }
 
 model Images {

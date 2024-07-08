@@ -28,6 +28,16 @@ CREATE TABLE "user_profiles" (
 );
 
 -- CreateTable
+CREATE TABLE "sessions" (
+    "uuid" TEXT NOT NULL,
+    "user_id" INTEGER NOT NULL,
+    "user_agent" TEXT NOT NULL,
+    "expires_at" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "sessions_pkey" PRIMARY KEY ("uuid")
+);
+
+-- CreateTable
 CREATE TABLE "images" (
     "id" SERIAL NOT NULL,
     "sum" TEXT NOT NULL,
@@ -50,3 +60,6 @@ ALTER TABLE "user_profiles" ADD CONSTRAINT "user_profiles_user_id_fkey" FOREIGN 
 
 -- AddForeignKey
 ALTER TABLE "user_profiles" ADD CONSTRAINT "user_profiles_avatar_id_fkey" FOREIGN KEY ("avatar_id") REFERENCES "images"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "sessions" ADD CONSTRAINT "sessions_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
