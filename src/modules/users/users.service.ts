@@ -187,4 +187,12 @@ export class UsersService{
             await this.emailService.sendEmail(user.email, "Verify your email", `Your OTP is ${otpVerification.otp}`);
         });
     }
+
+    async isUsernameAvailable(username: string){
+        return !await this.prismaService.users.findFirst({
+            where: {
+                username,
+            }
+        });
+    }
 }

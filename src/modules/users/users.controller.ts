@@ -1,4 +1,4 @@
-import {Body, Controller, Get, HttpStatus, Post, Req, Res, UseGuards} from "@nestjs/common";
+import {Body, ConflictException, Controller, Get, HttpStatus, Param, Post, Req, Res, UseGuards} from "@nestjs/common";
 import {ApiResponse, ApiTags} from "@nestjs/swagger";
 import {UsersService} from "./users.service";
 import {CreateUserDto} from "./models/dto/create-user.dto";
@@ -8,6 +8,7 @@ import {AuthService} from "../auth/auth.service";
 import {ConfigService} from "@nestjs/config";
 import {AuthGuard} from "../auth/guards/auth.guard";
 import {OtpDto} from "./models/dto/otp.dto";
+import {UsernameParamDto} from "./models/dto/username-param.dto";
 
 @Controller("users")
 @ApiTags("Users")
@@ -17,6 +18,14 @@ export class UsersController{
         private readonly authService: AuthService,
         private readonly configService: ConfigService,
     ){}
+
+    @Get("username/availability/:username")
+    @ApiResponse({status: HttpStatus.OK, description: "Username available"})
+    @ApiResponse({status: HttpStatus.CONFLICT, description: "Username already used"})
+    async checkUsernameAvailability(@Req() req: any, @Param() params: UsernameParamDto){
+        if(!await this.usersService.isUsernameAvailable(params.username))
+            throw new ConflictException("Username already used");
+    }
 
     @Post("register")
     @ApiResponse({status: HttpStatus.CREATED, description: "User created"})
