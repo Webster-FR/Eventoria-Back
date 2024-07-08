@@ -107,18 +107,18 @@ export class CipherService{
             }, buffer).toString("utf-8");
     }
 
-    generateRandomBytes(bytesNumber = 32){
+    generateRandomBytes(bytesNumber = 32): string{
         return crypto.randomBytes(bytesNumber).toString("hex");
     }
 
-    generateRandomNumbers(numbersNumber = 6){
+    generateRandomNumbers(numbersNumber = 6): string{
         let numbers = "";
         for(let i = 0; i < numbersNumber; i++)
             numbers += Math.floor(Math.random() * 10);
         return numbers;
     }
 
-    generateUuidV7(){
+    generateUuidV7(): string{
         return uuid.v7();
     }
 }
