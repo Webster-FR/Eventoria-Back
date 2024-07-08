@@ -1,4 +1,4 @@
-import {ConflictException, ForbiddenException, Injectable} from "@nestjs/common";
+import {BadRequestException, ConflictException, ForbiddenException, Injectable} from "@nestjs/common";
 import {PrismaService} from "../misc/prisma.service";
 import {CipherService} from "../misc/cipher.service";
 import {UserEntity} from "./models/entities/user.entity";
@@ -106,5 +106,40 @@ export class UsersService{
                 twitter: user.user_profile.twitter,
             } as UserProfileEntity,
         } as UserEntity;
+    }
+
+    async confirmEmail(userId: number, otp: string){
+        const otpVerification = await this.prismaService.otpVerifications.findFirst({
+            where: {
+                user_id: userId,
+                otp
+            }
+        });
+        if(!otpVerification)
+            throw new BadRequestException("Invalid OTP");
+        if(otpVerification.expires_at < new Date()){
+            await this.prismaService.otpVerifications.delete({
+                where: {
+                    user_id: otpVerification.user_id,
+                }
+            });
+            throw new ForbiddenException("OTP expired");
+        }
+
+        await this.prismaService.$transaction(async(tx) => {
+            await tx.otpVerifications.delete({
+                where: {
+                    user_id: otpVerification.user_id,
+                }
+            });
+            await tx.users.update({
+                where: {
+                    id: userId,
+                },
+                data: {
+                    verified_at: new Date(),
+                }
+            });
+        });
     }
 }
