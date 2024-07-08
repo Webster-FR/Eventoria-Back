@@ -22,13 +22,14 @@ export class AuthController{
     @ApiResponse({status: HttpStatus.UNAUTHORIZED, description: "Invalid credentials"})
     async login(@Body() body: LoginDto, @Req() req: FastifyRequest, @Res({passthrough: true}) res: FastifyReply){
         const userAgent = req.headers["user-agent"];
-        const {sessionUUID, userId} = await this.authService.createSession(body.email, body.password, userAgent, body.remember);
-        res.setCookie("session", sessionUUID, {
+        const {sessionUuid, userId} = await this.authService.createSession(body.email, body.password, userAgent, body.remember);
+        res.setCookie("session", sessionUuid, {
             httpOnly: true,
             sameSite: "lax",
             secure: this.configService.get("SECURE_COOKIE") === "true",
             path: "/",
         });
+        res.status(HttpStatus.OK);
         res.send(await this.usersService.getUserById(userId));
     }
 
