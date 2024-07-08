@@ -11,7 +11,7 @@ export class AuthService{
         private readonly configService: ConfigService,
     ){}
 
-    async createSession(email: string, password: string, userAgent: string, remember: boolean): Promise<string>{
+    async createSession(email: string, password: string, userAgent: string, remember: boolean): Promise<any>{
         const user = await this.prismaService.users.findFirst({
             where: {
                 email,
@@ -31,7 +31,7 @@ export class AuthService{
                 user_agent: userAgent,
             }
         });
-        return sessionUuid;
+        return {sessionUuid, userId: user.id};
     }
 
     async createSessionByUserId(userId: number, userAgent: string, remember: boolean): Promise<string>{

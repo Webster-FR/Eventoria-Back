@@ -5,25 +5,31 @@ import {FastifyReply, FastifyRequest} from "fastify";
 import {LoginDto} from "./models/dto/login.dto";
 import {ConfigService} from "@nestjs/config";
 import {AuthGuard} from "./guards/auth.guard";
+import {UsersService} from "../users/users.service";
+import {UserEntity} from "../users/models/entities/user.entity";
 
 @Controller("auth")
 @ApiTags("Authentication")
 export class AuthController{
     constructor(
         private readonly authService: AuthService,
+        private readonly usersService: UsersService,
         private readonly configService: ConfigService,
     ){}
 
     @Post("login")
+    @ApiResponse({status: HttpStatus.OK, description: "Login successful", type: UserEntity})
+    @ApiResponse({status: HttpStatus.UNAUTHORIZED, description: "Invalid credentials"})
     async login(@Body() body: LoginDto, @Req() req: FastifyRequest, @Res({passthrough: true}) res: FastifyReply){
         const userAgent = req.headers["user-agent"];
-        const sessionUUID = await this.authService.createSession(body.email, body.password, userAgent, body.remember);
+        const {sessionUUID, userId} = await this.authService.createSession(body.email, body.password, userAgent, body.remember);
         res.setCookie("session", sessionUUID, {
             httpOnly: true,
             sameSite: "lax",
             secure: this.configService.get("SECURE_COOKIE") === "true",
             path: "/",
         });
+        res.send(await this.usersService.getUserById(userId));
     }
 
     @Post("logout")
