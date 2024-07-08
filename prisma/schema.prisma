@@ -1,0 +1,65 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  id           Int           @id @default(autoincrement())
+  username     String        @unique
+  email        String        @unique
+  admin        Boolean       @default(false)
+  password     String
+  verified_at  DateTime?
+  created_at   DateTime      @default(now())
+  updated_at   DateTime      @updatedAt
+  user_profile UserProfiles?
+  sessions     Sessions[]
+
+  @@map("users")
+}
+
+model UserProfiles {
+  user_id      Int     @id
+  user         Users   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  display_name String
+  avatar_id    Int?
+  avatar       Images? @relation(fields: [avatar_id], references: [id], onDelete: SetNull)
+  instagram    String?
+  facebook     String?
+  twitter      String?
+
+  @@map("user_profiles")
+}
+
+model Sessions {
+  uuid       String   @id
+  user_id    Int
+  user       Users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_agent String
+  expires_at DateTime
+
+  @@map("sessions")
+}
+
+model Images {
+  id            Int            @id @default(autoincrement())
+  sum           String         @unique
+  image_type    ImageType
+  user_profiles UserProfiles[]
+
+  @@map("images")
+}
+
+enum ImageType {
+  AVATAR
+}
