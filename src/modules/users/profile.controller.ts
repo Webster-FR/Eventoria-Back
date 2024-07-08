@@ -1,5 +1,5 @@
 import {
-    BadRequestException,
+    BadRequestException, Body,
     Controller,
     HttpStatus,
     Patch,
@@ -12,6 +12,7 @@ import {ApiBody, ApiConsumes, ApiResponse, ApiTags} from "@nestjs/swagger";
 import {ProfileService} from "./profile.service";
 import {FileInterceptor} from "@nest-lab/fastify-multer";
 import {AuthGuard} from "../auth/guards/auth.guard";
+import {DisplayNameDto} from "./models/dto/display-name.dto";
 
 @Controller("user/profile")
 @ApiTags("Profile")
@@ -55,6 +56,18 @@ export class ProfileController{
         @UploadedFile() file: any
     ){
         await this.profileService.updateAvatar(req.user.id, file.buffer);
+    }
+
+    @Patch("display-name")
+    @UseGuards(AuthGuard)
+    @ApiResponse({status: HttpStatus.OK, description: "Display name updated"})
+    @ApiResponse({status: HttpStatus.UNAUTHORIZED, description: "Authentication required"})
+    @ApiResponse({status: HttpStatus.BAD_REQUEST, description: "Display name is invalid"})
+    async changeDisplayName(
+        @Req() req: any,
+        @Body() body: DisplayNameDto
+    ){
+        await this.profileService.changeDisplayName(req.user.id, body.displayName);
     }
 
 }

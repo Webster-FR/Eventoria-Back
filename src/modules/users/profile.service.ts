@@ -31,4 +31,15 @@ export class ProfileService{
         });
     }
 
+    async changeDisplayName(userId: number, displayName: string){
+        await this.prismaService.userProfiles.update({
+            where: {
+                user_id: userId,
+            },
+            data: {
+                display_name: displayName,
+            }
+        });
+    }
+
 }
