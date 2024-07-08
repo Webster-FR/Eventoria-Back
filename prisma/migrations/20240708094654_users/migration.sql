@@ -1,6 +1,3 @@
--- CreateEnum
-CREATE TYPE "ImageType" AS ENUM ('AVATAR');
-
 -- CreateTable
 CREATE TABLE "users" (
     "id" SERIAL NOT NULL,
@@ -41,7 +38,6 @@ CREATE TABLE "sessions" (
 CREATE TABLE "images" (
     "id" SERIAL NOT NULL,
     "sum" TEXT NOT NULL,
-    "image_type" "ImageType" NOT NULL,
 
     CONSTRAINT "images_pkey" PRIMARY KEY ("id")
 );

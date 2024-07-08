@@ -54,12 +54,7 @@ model Sessions {
 model Images {
   id            Int            @id @default(autoincrement())
   sum           String         @unique
-  image_type    ImageType
   user_profiles UserProfiles[]
 
   @@map("images")
-}
-
-enum ImageType {
-  AVATAR
 }
