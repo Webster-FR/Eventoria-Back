@@ -28,7 +28,7 @@ export class UsersController{
     }
 
     @Post("register")
-    @ApiResponse({status: HttpStatus.CREATED, description: "User created"})
+    @ApiResponse({status: HttpStatus.CREATED, description: "User created", type: UserEntity})
     @ApiResponse({status: HttpStatus.FORBIDDEN, description: "Banned email"})
     @ApiResponse({status: HttpStatus.BAD_REQUEST, description: "Some fields are wrong"})
     @ApiResponse({status: HttpStatus.CONFLICT, description: "Username or email already used"})
@@ -42,6 +42,7 @@ export class UsersController{
             secure: this.configService.get("SECURE_COOKIE") === "true",
             path: "/" + this.configService.get("PREFIX"),
         });
+        res.send(user);
     }
 
     @Get("me")
