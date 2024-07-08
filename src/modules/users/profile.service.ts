@@ -1,6 +1,7 @@
 import {Injectable} from "@nestjs/common";
 import {PrismaService} from "../misc/prisma.service";
 import {ImagesService} from "../images/images.service";
+import {SocialsDto} from "./models/dto/socials.dto";
 
 @Injectable()
 export class ProfileService{
@@ -49,6 +50,17 @@ export class ProfileService{
             },
             data: {
                 bio,
+            }
+        });
+    }
+
+    async updateSocials(userId: number, body: SocialsDto){
+        await this.prismaService.userProfiles.update({
+            where: {
+                user_id: userId,
+            },
+            data: {
+                ...body
             }
         });
     }

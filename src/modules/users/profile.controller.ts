@@ -2,7 +2,7 @@ import {
     BadRequestException, Body,
     Controller,
     HttpStatus,
-    Patch,
+    Patch, Put,
     Req,
     UploadedFile,
     UseGuards,
@@ -14,6 +14,7 @@ import {FileInterceptor} from "@nest-lab/fastify-multer";
 import {AuthGuard} from "../auth/guards/auth.guard";
 import {DisplayNameDto} from "./models/dto/display-name.dto";
 import {BioDto} from "./models/dto/bio.dto";
+import {SocialsDto} from "./models/dto/socials.dto";
 
 @Controller("user/profile")
 @ApiTags("Profile")
@@ -81,6 +82,18 @@ export class ProfileController{
         @Body() body: BioDto
     ){
         await this.profileService.changeBio(req.user.id, body.bio);
+    }
+
+    @Put("socials")
+    @UseGuards(AuthGuard)
+    @ApiResponse({status: HttpStatus.OK, description: "Socials updated"})
+    @ApiResponse({status: HttpStatus.UNAUTHORIZED, description: "Authentication required"})
+    @ApiResponse({status: HttpStatus.BAD_REQUEST, description: "Socials are invalid"})
+    async updateSocials(
+        @Req() req: any,
+        @Body() body: SocialsDto
+    ){
+        await this.profileService.updateSocials(req.user.id, body);
     }
 
 }
