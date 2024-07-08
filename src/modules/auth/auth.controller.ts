@@ -1,4 +1,4 @@
-import {Body, Controller, HttpCode, HttpStatus, Post, Req, Res, UseGuards} from "@nestjs/common";
+import {Body, Controller, Get, HttpCode, HttpStatus, Post, Req, Res, UseGuards} from "@nestjs/common";
 import {ApiResponse, ApiTags} from "@nestjs/swagger";
 import {AuthService} from "./auth.service";
 import {FastifyReply, FastifyRequest} from "fastify";
@@ -7,6 +7,7 @@ import {ConfigService} from "@nestjs/config";
 import {AuthGuard} from "./guards/auth.guard";
 import {UsersService} from "../users/users.service";
 import {UserEntity} from "../users/models/entities/user.entity";
+import {PublicSessionEntity} from "../users/models/entities/public-session.entity";
 
 @Controller("auth")
 @ApiTags("Authentication")
@@ -37,6 +38,7 @@ export class AuthController{
     @UseGuards(AuthGuard)
     @HttpCode(HttpStatus.NO_CONTENT)
     @ApiResponse({status: HttpStatus.NO_CONTENT, description: "Logout successful"})
+    @ApiResponse({status: HttpStatus.UNAUTHORIZED, description: "Authentication required"})
     async logout(@Req() request: any, @Res({passthrough: true}) res: FastifyReply){
         const sessionUUID = request.cookies.session;
         await this.authService.invalidateSession(request.user.id, sessionUUID);
@@ -47,9 +49,18 @@ export class AuthController{
     @UseGuards(AuthGuard)
     @HttpCode(HttpStatus.NO_CONTENT)
     @ApiResponse({status: HttpStatus.NO_CONTENT, description: "Logout successful"})
+    @ApiResponse({status: HttpStatus.UNAUTHORIZED, description: "Authentication required"})
     async logoutAll(@Req() request: any, @Res({passthrough: true}) res: FastifyReply){
         await this.authService.invalidateUserSessions(request.user.id);
         res.clearCookie("session");
+    }
+
+    @Get("sessions")
+    @UseGuards(AuthGuard)
+    @ApiResponse({status: HttpStatus.OK, description: "Get all sessions", type: [PublicSessionEntity]})
+    @ApiResponse({status: HttpStatus.UNAUTHORIZED, description: "Authentication required"})
+    async getSessions(@Req() request: any){
+        return this.authService.getSessions(request.user.id);
     }
 
 }
