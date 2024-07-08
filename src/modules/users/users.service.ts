@@ -1,4 +1,10 @@
-import {ConflictException, ForbiddenException, Injectable} from "@nestjs/common";
+import {
+    BadRequestException,
+    ConflictException,
+    ForbiddenException,
+    Injectable,
+    NotFoundException
+} from "@nestjs/common";
 import {PrismaService} from "../misc/prisma.service";
 import {CipherService} from "../misc/cipher.service";
 import {UserEntity} from "./models/entities/user.entity";
@@ -106,5 +112,87 @@ export class UsersService{
                 twitter: user.user_profile.twitter,
             } as UserProfileEntity,
         } as UserEntity;
+    }
+
+    async confirmEmail(userId: number, otp: string){
+        const otpVerification = await this.prismaService.otpVerifications.findFirst({
+            where: {
+                user_id: userId,
+                otp
+            }
+        });
+        if(!otpVerification)
+            throw new BadRequestException("Invalid OTP");
+        if(otpVerification.expires_at < new Date()){
+            await this.prismaService.otpVerifications.delete({
+                where: {
+                    user_id: otpVerification.user_id,
+                }
+            });
+            throw new ForbiddenException("OTP expired");
+        }
+
+        await this.prismaService.$transaction(async(tx) => {
+            await tx.otpVerifications.delete({
+                where: {
+                    user_id: otpVerification.user_id,
+                }
+            });
+            await tx.users.update({
+                where: {
+                    id: userId,
+                },
+                data: {
+                    verified_at: new Date(),
+                }
+            });
+        });
+    }
+
+    async resendEmailConfirmation(userId: number){
+        const user = await this.prismaService.users.findUnique({
+            where: {
+                id: userId,
+            }
+        });
+        if(!user)
+            throw new NotFoundException("User not found");
+        if(user.verified_at)
+            throw new BadRequestException("User already verified");
+
+        const otpVerification = await this.prismaService.otpVerifications.findFirst({
+            where: {
+                user_id: userId,
+            }
+        });
+        if(otpVerification){
+            if (otpVerification.expires_at < new Date())
+                await this.prismaService.otpVerifications.delete({
+                    where: {
+                        user_id: userId,
+                    }
+                });
+            else
+                throw new BadRequestException("OTP already sent");
+        }
+
+        await this.prismaService.$transaction(async(tx) => {
+            const otpVerification = await tx.otpVerifications.create({
+                data: {
+                    user_id: userId,
+                    otp: this.cipherService.generateRandomNumbers(6),
+                    expires_at: new Date(Date.now() + 1000 * 60 * 5), // 5 minutes
+                }
+            });
+            await this.emailService.sendEmail(user.email, "Verify your email", `Your OTP is ${otpVerification.otp}`);
+        });
+    }
+
+    async isUsernameAvailable(username: string){
+        return !await this.prismaService.users.findFirst({
+            where: {
+                username,
+            }
+        });
     }
 }
