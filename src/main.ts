@@ -13,6 +13,7 @@ import {LoggerMiddleware} from "./common/middlewares/logger.middleware";
 import {Logger} from "@nestjs/common";
 import {CustomValidationPipe} from "./common/pipes/custom-validation.pipe";
 import fastifyCookie from "@fastify/cookie";
+import fastifyMultipart from "@fastify/multipart";
 
 dotenv.config();
 
@@ -84,6 +85,7 @@ async function loadServer(server: NestFastifyApplication<RawServerDefault>, serv
 
     // Middlewares
     server.use(new LoggerMiddleware().use);
+    await server.register(fastifyMultipart);
     await server.register(fastifyCookie, {
         secret: process.env.COOKIE_SECRET,
     });

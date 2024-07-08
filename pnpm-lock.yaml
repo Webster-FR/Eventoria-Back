@@ -14,9 +14,15 @@ importers:
       '@fastify/helmet':
         specifier: ^11.1.1
         version: 11.1.1
+      '@fastify/multipart':
+        specifier: ^8.3.0
+        version: 8.3.0
       '@fastify/static':
         specifier: ^7.0.4
         version: 7.0.4
+      '@nest-lab/fastify-multer':
+        specifier: ^1.2.0
+        version: 1.2.0(@nestjs/common@10.3.10(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/platform-fastify@10.3.10(@fastify/static@7.0.4)(@nestjs/common@10.3.10(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/core@10.3.10(@nestjs/common@10.3.10(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/platform-express@10.3.10)(reflect-metadata@0.2.2)(rxjs@7.8.1)))(rxjs@7.8.1)
       '@nestjs-modules/mailer':
         specifier: ^2.0.2
         version: 2.0.2(@nestjs/common@10.3.10(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/core@10.3.10(@nestjs/common@10.3.10(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/platform-express@10.3.10)(reflect-metadata@0.2.2)(rxjs@7.8.1))(nodemailer@6.9.14)
@@ -434,11 +440,22 @@ packages:
   '@fastify/ajv-compiler@3.6.0':
     resolution: {integrity: sha512-LwdXQJjmMD+GwLOkP7TVC68qa+pSSogeWWmznRJ/coyTcfe9qA05AHFSe1eZFwK6q+xVRpChnvFUkf1iYaSZsQ==}
 
+  '@fastify/busboy@1.2.1':
+    resolution: {integrity: sha512-7PQA7EH43S0CxcOa9OeAnaeA0oQ+e/DHNPZwSQM9CQHW76jle5+OvLdibRp/Aafs9KXbLhxyjOTkRjWUbQEd3Q==}
+    engines: {node: '>=14'}
+
+  '@fastify/busboy@2.1.1':
+    resolution: {integrity: sha512-vBZP4NlzfOlerQTnba4aqZoMhE/a9HY7HRqoOPaETQcSQuWEIyZMHGfVu6w9wGtGK5fED5qRs2DteVCjOH60sA==}
+    engines: {node: '>=14'}
+
   '@fastify/cookie@9.3.1':
     resolution: {integrity: sha512-h1NAEhB266+ZbZ0e9qUE6NnNR07i7DnNXWG9VbbZ8uC6O/hxHpl+Zoe5sw1yfdZ2U6XhToUGDnzQtWJdCaPwfg==}
 
   '@fastify/cors@9.0.1':
     resolution: {integrity: sha512-YY9Ho3ovI+QHIL2hW+9X4XqQjXLjJqsU+sMV/xFsxZkE8p3GNnYVFpoOxF7SsP5ZL76gwvbo3V9L+FIekBGU4Q==}
+
+  '@fastify/deepmerge@1.3.0':
+    resolution: {integrity: sha512-J8TOSBq3SoZbDhM9+R/u77hP93gz/rajSA+K2kGyijPpORPWUXHUpTaleoj+92As0S9uPRP7Oi8IqMf0u+ro6A==}
 
   '@fastify/error@3.4.1':
     resolution: {integrity: sha512-wWSvph+29GR783IhmvdwWnN4bUxTD01Vm5Xad4i7i1VuAOItLvbPAb69sb0IQ2N57yprvhNIwAP5B6xfKTmjmQ==}
@@ -457,6 +474,9 @@ packages:
 
   '@fastify/middie@8.3.1':
     resolution: {integrity: sha512-qrQ8U3iCdjNum3+omnIvAyz21ifFx+Pp5jYW7PJJ7b9ueKTCPXsH6vEvaZQrjEZvOpTnWte+CswfBODWD0NqYQ==}
+
+  '@fastify/multipart@8.3.0':
+    resolution: {integrity: sha512-A8h80TTyqUzaMVH0Cr9Qcm6RxSkVqmhK/MVBYHYeRRSUbUYv08WecjWKSlG2aSnD4aGI841pVxAjC+G1GafUeQ==}
 
   '@fastify/send@2.1.0':
     resolution: {integrity: sha512-yNYiY6sDkexoJR0D8IDy3aRP3+L4wdqCpvx5WP+VtEU58sn7USmKynBzDQex5X42Zzvw2gNzzYgP90UfWShLFA==}
@@ -706,6 +726,13 @@ packages:
 
   '@microsoft/tsdoc@0.15.0':
     resolution: {integrity: sha512-HZpPoABogPvjeJOdzCOSJsXeL/SMCBgBZMVC3X3d7YYp2gf31MfxhUoYUNwf1ERPJOnQc0wkFn9trqI6ZEdZuA==}
+
+  '@nest-lab/fastify-multer@1.2.0':
+    resolution: {integrity: sha512-VTDNtoPj7j540Qfmc/2KAhG68EQEKqfFKdH8k067W2MELIuDpClkfTbmZIo6HFUZOf27vPw/NxPoFb5y4uvcCg==}
+    peerDependencies:
+      '@nestjs/common': ^9.0.0 || ^10.0.0
+      '@nestjs/platform-fastify': ^9.0.0 || ^10.0.0
+      rxjs: ^7.0.0
 
   '@nestjs-modules/mailer@2.0.2':
     resolution: {integrity: sha512-+z4mADQasg0H1ZaGu4zZTuKv2pu+XdErqx99PLFPzCDNTN/q9U59WPgkxVaHnsvKHNopLj5Xap7G4ZpptduoYw==}
@@ -1549,6 +1576,10 @@ packages:
     resolution: {integrity: sha512-27HBghJxjiZtIk3Ycvn/4kbJk/1uZuJFfuPEns6LaEvpvG1f0hTea8lilrouyo9mVc2GWdcEZ8OLoGmSADlrCw==}
     engines: {'0': node >= 0.8}
 
+  concat-stream@2.0.0:
+    resolution: {integrity: sha512-MWufYdFw53ccGjCA+Ol7XJYpAlW6/prSMzuPOTRnJGcGzuhLn4Scrz7qf6o8bROZ514ltazcIFJZevcfbo0x7A==}
+    engines: {'0': node >= 6.0}
+
   config-chain@1.1.13:
     resolution: {integrity: sha512-qj+f8APARXHrM0hraqXYb2/bOVSV4PvJQlNZ/DVj0QrmNM2q2euizkeuVckQ57J+W0mRH6Hvi+k50M4Jul2VRQ==}
 
@@ -1974,6 +2005,13 @@ packages:
 
   fast-uri@2.4.0:
     resolution: {integrity: sha512-ypuAmmMKInk5q7XcepxlnUWDLWv4GFtaJqAzWKqn62IpQ3pejtr5dTVbt3vwqVaMKmkNR55sTT+CqUKIaT21BA==}
+
+  fastify-multer@2.0.3:
+    resolution: {integrity: sha512-QnFqrRgxmUwWHTgX9uyQSu0C/hmVCfcxopqjApZ4uaZD5W9MJ+nHUlW4+9q7Yd3BRxDIuHvgiM5mjrh6XG8cAA==}
+    engines: {node: '>=10.17.0'}
+
+  fastify-plugin@2.3.4:
+    resolution: {integrity: sha512-I+Oaj6p9oiRozbam30sh39BiuiqBda7yK2nmSPVwDCfIBlKnT8YB3MY+pRQc2Fcd07bf6KPGklHJaQ2Qu81TYQ==}
 
   fastify-plugin@4.5.1:
     resolution: {integrity: sha512-stRHYGeuqpEZTL1Ef0Ovr2ltazUT9g844X5z/zEBFLG8RYlpDiOCIG+ATvYEp+/zmc7sN29mcIMp8gvYplYPIQ==}
@@ -2893,6 +2931,11 @@ packages:
     resolution: {integrity: sha512-FP+p8RB8OWpF3YZBCrP5gtADmtXApB5AMLn+vdyA+PyxCjrCs00mjyUozssO33cwDeT3wNGdLxJ5M//YqtHAJw==}
     hasBin: true
 
+  mkdirp@1.0.4:
+    resolution: {integrity: sha512-vVqVZQyf3WLx2Shd0qJ9xuvqgAyKPLAiqITEtqW0oIUjzo3PePDd6fW9iFz30ef7Ysp/oiWqbhszeGWW2T6Gzw==}
+    engines: {node: '>=10'}
+    hasBin: true
+
   mnemonist@0.39.6:
     resolution: {integrity: sha512-A/0v5Z59y63US00cRSLiloEIw3t5G+MiKz4BhX21FI+YBJXBOGW0ohFxTxO08dsOYlzxo87T7vGfZKYp2bcAWA==}
 
@@ -3521,6 +3564,10 @@ packages:
     resolution: {integrity: sha512-RwNA9Z/7PrK06rYLIzFMlaF+l73iwpzsqRIFgbMLbTcLD6cOao82TaWefPXQvB2fOC4AjuYSEndS7N/mTCbkdQ==}
     engines: {node: '>= 0.8'}
 
+  stream-wormhole@1.1.0:
+    resolution: {integrity: sha512-gHFfL3px0Kctd6Po0M8TzEvt3De/xu6cnRrjlfYNhwbhLPLwigI2t1nc6jrzNuaYg5C4YF78PPFuQPzRiqn9ew==}
+    engines: {node: '>=4.0.0'}
+
   streamsearch@1.1.0:
     resolution: {integrity: sha512-Mcc5wHehp9aXz1ax6bZUyY5afg9u2rv5cqQI3mRrYkGC8rW2hM02jWuwjtL++LS5qinSyhj2QfLyNsuc+VsExg==}
     engines: {node: '>=10.0.0'}
@@ -3638,6 +3685,9 @@ packages:
   test-exclude@6.0.0:
     resolution: {integrity: sha512-cAGWPIyOHU6zlmg88jwm7VRyXnMN7iV68OGAbYDk/Mh/xC/pzVPlQtY6ngoIH/5/tciuhGfvESU8GrHrcxD56w==}
     engines: {node: '>=8'}
+
+  text-decoding@1.0.0:
+    resolution: {integrity: sha512-/0TJD42KDnVwKmDK6jj3xP7E2MG7SHAOG4tyTgyUCRPdHwvkquYNLEQltmdMa3owq3TkddCVcTsoctJI8VQNKA==}
 
   text-table@0.2.0:
     resolution: {integrity: sha512-N+8UisAXDGk8PFXP4HAzVR9nbfmVJ3zYLAWiTIoqC5v5isinhr+r5uaO8+7r3BMfuNIufIsA7RdpVgacC2cSpw==}
@@ -4294,6 +4344,12 @@ snapshots:
       ajv-formats: 2.1.1(ajv@8.16.0)
       fast-uri: 2.4.0
 
+  '@fastify/busboy@1.2.1':
+    dependencies:
+      text-decoding: 1.0.0
+
+  '@fastify/busboy@2.1.1': {}
+
   '@fastify/cookie@9.3.1':
     dependencies:
       cookie-signature: 1.2.1
@@ -4303,6 +4359,8 @@ snapshots:
     dependencies:
       fastify-plugin: 4.5.1
       mnemonist: 0.39.6
+
+  '@fastify/deepmerge@1.3.0': {}
 
   '@fastify/error@3.4.1': {}
 
@@ -4330,6 +4388,15 @@ snapshots:
       fastify-plugin: 4.5.1
       path-to-regexp: 6.2.2
       reusify: 1.0.4
+
+  '@fastify/multipart@8.3.0':
+    dependencies:
+      '@fastify/busboy': 2.1.1
+      '@fastify/deepmerge': 1.3.0
+      '@fastify/error': 3.4.1
+      fastify-plugin: 4.5.1
+      secure-json-parse: 2.7.0
+      stream-wormhole: 1.1.0
 
   '@fastify/send@2.1.0':
     dependencies:
@@ -4652,6 +4719,13 @@ snapshots:
   '@lukeed/ms@2.0.2': {}
 
   '@microsoft/tsdoc@0.15.0': {}
+
+  '@nest-lab/fastify-multer@1.2.0(@nestjs/common@10.3.10(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/platform-fastify@10.3.10(@fastify/static@7.0.4)(@nestjs/common@10.3.10(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/core@10.3.10(@nestjs/common@10.3.10(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/platform-express@10.3.10)(reflect-metadata@0.2.2)(rxjs@7.8.1)))(rxjs@7.8.1)':
+    dependencies:
+      '@nestjs/common': 10.3.10(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.2.2)(rxjs@7.8.1)
+      '@nestjs/platform-fastify': 10.3.10(@fastify/static@7.0.4)(@nestjs/common@10.3.10(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/core@10.3.10(@nestjs/common@10.3.10(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/platform-express@10.3.10)(reflect-metadata@0.2.2)(rxjs@7.8.1))
+      fastify-multer: 2.0.3
+      rxjs: 7.8.1
 
   '@nestjs-modules/mailer@2.0.2(@nestjs/common@10.3.10(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/core@10.3.10(@nestjs/common@10.3.10(class-transformer@0.5.1)(class-validator@0.14.1)(reflect-metadata@0.2.2)(rxjs@7.8.1))(@nestjs/platform-express@10.3.10)(reflect-metadata@0.2.2)(rxjs@7.8.1))(nodemailer@6.9.14)':
     dependencies:
@@ -5670,6 +5744,13 @@ snapshots:
       readable-stream: 2.3.8
       typedarray: 0.0.6
 
+  concat-stream@2.0.0:
+    dependencies:
+      buffer-from: 1.1.2
+      inherits: 2.0.4
+      readable-stream: 3.6.2
+      typedarray: 0.0.6
+
   config-chain@1.1.13:
     dependencies:
       ini: 1.3.8
@@ -6155,6 +6236,21 @@ snapshots:
   fast-safe-stringify@2.1.1: {}
 
   fast-uri@2.4.0: {}
+
+  fastify-multer@2.0.3:
+    dependencies:
+      '@fastify/busboy': 1.2.1
+      append-field: 1.0.0
+      concat-stream: 2.0.0
+      fastify-plugin: 2.3.4
+      mkdirp: 1.0.4
+      on-finished: 2.4.1
+      type-is: 1.6.18
+      xtend: 4.0.2
+
+  fastify-plugin@2.3.4:
+    dependencies:
+      semver: 7.6.2
 
   fastify-plugin@4.5.1: {}
 
@@ -7596,6 +7692,8 @@ snapshots:
     dependencies:
       minimist: 1.2.8
 
+  mkdirp@1.0.4: {}
+
   mnemonist@0.39.6:
     dependencies:
       obliterator: 2.0.4
@@ -8292,6 +8390,8 @@ snapshots:
 
   statuses@2.0.1: {}
 
+  stream-wormhole@1.1.0: {}
+
   streamsearch@1.1.0: {}
 
   string-length@4.0.2:
@@ -8406,6 +8506,8 @@ snapshots:
       '@istanbuljs/schema': 0.1.3
       glob: 7.2.3
       minimatch: 3.1.2
+
+  text-decoding@1.0.0: {}
 
   text-table@0.2.0: {}
 

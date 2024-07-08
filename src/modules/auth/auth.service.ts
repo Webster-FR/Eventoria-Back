@@ -2,6 +2,7 @@ import {Injectable, NotFoundException, UnauthorizedException} from "@nestjs/comm
 import {PrismaService} from "../misc/prisma.service";
 import {CipherService} from "../misc/cipher.service";
 import {ConfigService} from "@nestjs/config";
+import {PublicSessionEntity} from "../users/models/entities/public-session.entity";
 
 @Injectable()
 export class AuthService{
@@ -11,7 +12,7 @@ export class AuthService{
         private readonly configService: ConfigService,
     ){}
 
-    async createSession(email: string, password: string, userAgent: string, remember: boolean): Promise<string>{
+    async createSession(email: string, password: string, userAgent: string, remember: boolean): Promise<any>{
         const user = await this.prismaService.users.findFirst({
             where: {
                 email,
@@ -31,7 +32,7 @@ export class AuthService{
                 user_agent: userAgent,
             }
         });
-        return sessionUuid;
+        return {sessionUuid, userId: user.id};
     }
 
     async createSessionByUserId(userId: number, userAgent: string, remember: boolean): Promise<string>{
@@ -49,6 +50,8 @@ export class AuthService{
     }
 
     async verifySession(sessionUuid: string, userAgent: string): Promise<number>{
+        if(sessionUuid === "undefined")
+            throw new UnauthorizedException("Session not found");
         const session = await this.prismaService.sessions.findFirst({
             where: {
                 uuid: sessionUuid,
@@ -71,11 +74,60 @@ export class AuthService{
         });
     }
 
-    async invalidateUserSessions(id: number){
+    async invalidateUserSessions(userId: number){
         await this.prismaService.sessions.deleteMany({
             where: {
-                user_id: id,
+                user_id: userId,
             }
         });
+    }
+
+    async getSessions(userId: number): Promise<PublicSessionEntity[]>{
+        const sessions = await this.prismaService.sessions.findMany({
+            where: {
+                user_id: userId,
+            }
+        });
+        // Map with for loop
+        const publicSessions: PublicSessionEntity[] = [];
+        for(const session of sessions){
+            const {browser, os, device} = this.parseUserAgent(session.user_agent);
+            publicSessions.push({
+                id: session.uuid,
+                browserName: browser.name,
+                browserVersion: browser.version,
+                os,
+                device,
+                expiresAt: session.expires_at,
+            });
+        }
+        return publicSessions;
+    }
+
+    private parseUserAgent(userAgent: string): any {
+        const browserMatch = userAgent.match(/(opera|chrome|safari|firefox|msie|trident(?=\/))\/?\s*(\d+)/i) || [];
+        const versionMatch = userAgent.match(/version\/(\d+)/i);
+        const osMatch = userAgent.match(/(windows nt|mac os x|android|linux|iphone|ipad|windows phone)/i) || [];
+        const deviceMatch = userAgent.match(/(mobile|tablet)/i) || ["desktop"];
+
+        // Process browser and version
+        let browser = browserMatch[1] ? browserMatch[1].toLowerCase() : "unknown";
+        let version = versionMatch ? versionMatch[1] : browserMatch[2] ? browserMatch[2] : "unknown";
+
+        // Special handling for IE versions
+        if (/trident/i.test(browser)){
+            const ieVersionMatch = /\brv[ :]+(\d+)/g.exec(userAgent) || [];
+            browser = "msie";
+            version = ieVersionMatch[1] || "unknown";
+        }
+
+        return {
+            browser: {
+                name: browser,
+                version: version
+            },
+            os: osMatch[1] ? osMatch[1].toLowerCase() : "unknown",
+            device: deviceMatch[0].toLowerCase()
+        };
     }
 }
