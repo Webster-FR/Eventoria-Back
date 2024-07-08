@@ -3,6 +3,7 @@ import {PrismaService} from "../misc/prisma.service";
 import {CipherService} from "../misc/cipher.service";
 import {UserEntity} from "./models/entities/user.entity";
 import {EmailService} from "../misc/email.service";
+import {UserProfileEntity} from "./models/entities/user-profile.entity";
 
 @Injectable()
 export class UsersService{
@@ -71,8 +72,39 @@ export class UsersService{
             updatedAt: user.updated_at,
             profile: {
                 displayName: userProfile.display_name,
-            }
+            } as UserProfileEntity,
         } as UserEntity;
     }
 
+    async getUserById(userId: number): Promise<UserEntity>{
+        const user = await this.prismaService.users.findUnique({
+            where: {
+                id: userId,
+            },
+            include: {
+                user_profile: {
+                    include: {
+                        avatar: true,
+                    }
+                },
+            }
+        });
+
+        return {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            verified: !!user.verified_at,
+            createdAt: user.created_at,
+            updatedAt: user.updated_at,
+            profile: {
+                displayName: user.user_profile.display_name,
+                bio: user.user_profile.bio,
+                avatarSum: user.user_profile.avatar?.sum,
+                instagram: user.user_profile.instagram,
+                facebook: user.user_profile.facebook,
+                twitter: user.user_profile.twitter,
+            } as UserProfileEntity,
+        } as UserEntity;
+    }
 }

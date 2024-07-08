@@ -5,7 +5,7 @@ export class CreateUserDto{
     @ApiProperty()
     @IsNotEmpty()
     @IsString()
-    @Matches(/^(?=.*[a-z])[a-z._]{8,24}$/)
+    @Matches(/^(?=.*[a-z])[a-z._\d]{5,24}$/)
         username: string;
     @ApiProperty()
     @IsNotEmpty()
@@ -15,7 +15,7 @@ export class CreateUserDto{
     @ApiProperty()
     @IsNotEmpty()
     @IsString()
-    @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[_&é"'(§è!çà)\-°?,.;/:+=\\^¨$`£ù%µπÉÈÀÇâêôûòãñõ@#]).{8,}$/)
+    @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[_&é"'(§è!çà)\-°?,.;*/:+=\\^¨$`£ù%µπÉÈÀÇâêôûòãñõ@#]).{8,}$/)
         password: string;
     @ApiProperty()
     @IsNotEmpty()
