@@ -6,6 +6,7 @@ import {ThrottlerModule} from "@nestjs/throttler";
 import {UsersModule} from "./modules/users/users.module";
 import {MailerModule} from "@nestjs-modules/mailer";
 import * as dotenv from "dotenv";
+import {AuthModule} from "./modules/auth/auth.module";
 
 dotenv.config();
 
@@ -29,6 +30,7 @@ dotenv.config();
         MiscModule,
         ImagesModule,
         UsersModule,
+        AuthModule,
     ],
     controllers: [],
     providers: [],
