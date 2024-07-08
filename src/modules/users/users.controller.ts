@@ -35,7 +35,7 @@ export class UsersController{
     async registerUser(@Body() body: CreateUserDto, @Req() req: any, @Res({passthrough: true}) res: FastifyReply){
         const user = await this.usersService.createUser(body.username, body.email, body.password, body.displayName);
         const userAgent = req.headers["user-agent"];
-        const sessionUUID = await this.authService.createSessionByUserId(user.id, userAgent);
+        const sessionUUID = await this.authService.createSessionByUserId(user.id, userAgent, false);
         res.setCookie("session", sessionUUID, {
             httpOnly: true,
             sameSite: "strict",

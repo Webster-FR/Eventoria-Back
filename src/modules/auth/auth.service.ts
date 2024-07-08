@@ -1,15 +1,17 @@
 import {Injectable, NotFoundException, UnauthorizedException} from "@nestjs/common";
 import {PrismaService} from "../misc/prisma.service";
 import {CipherService} from "../misc/cipher.service";
+import {ConfigService} from "@nestjs/config";
 
 @Injectable()
 export class AuthService{
     constructor(
         private readonly prismaService: PrismaService,
         private readonly cipherService: CipherService,
+        private readonly configService: ConfigService,
     ){}
 
-    async createSession(email: string, password: string, userAgent: string): Promise<string>{
+    async createSession(email: string, password: string, userAgent: string, remember: boolean): Promise<string>{
         const user = await this.prismaService.users.findFirst({
             where: {
                 email,
@@ -20,24 +22,26 @@ export class AuthService{
         if(!await this.cipherService.compareHash(user.password, password))
             throw new UnauthorizedException("Invalid password");
         const sessionUuid = this.cipherService.generateUuidV7();
+        const duration: number = remember ? parseInt(this.configService.get("LONG_SESSION_DURATION")) : parseInt(this.configService.get("SESSION_DURATION"));
         await this.prismaService.sessions.create({
             data: {
                 user_id: user.id,
                 uuid: sessionUuid,
-                expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 1 week
+                expires_at: new Date(Date.now() + 1000 * duration),
                 user_agent: userAgent,
             }
         });
         return sessionUuid;
     }
 
-    async createSessionByUserId(userId: number, userAgent: string): Promise<string>{
+    async createSessionByUserId(userId: number, userAgent: string, remember: boolean): Promise<string>{
         const sessionUuid = this.cipherService.generateUuidV7();
+        const duration: number = remember ? parseInt(this.configService.get("LONG_SESSION_DURATION")) : parseInt(this.configService.get("SESSION_DURATION"));
         await this.prismaService.sessions.create({
             data: {
                 user_id: userId,
                 uuid: sessionUuid,
-                expires_at: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 1 week
+                expires_at: new Date(Date.now() + 1000 * duration),
                 user_agent: userAgent,
             }
         });
