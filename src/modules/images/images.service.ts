@@ -2,7 +2,7 @@ import {Injectable} from "@nestjs/common";
 import {PrismaService} from "../misc/prisma.service";
 import * as fs from "node:fs";
 import {CipherService} from "../misc/cipher.service";
-import sharp from "sharp";
+import * as sharp from "sharp";
 
 
 @Injectable()
@@ -12,12 +12,12 @@ export class ImagesService{
         private readonly cipherService: CipherService,
     ){}
 
-    async saveAvatar(image: Buffer): Promise<string>{
+    async saveAvatar(image: Buffer): Promise<number>{
         const newImage = await this.convertImage(await this.resizeImage(image, 256, 256));
         return await this.saveImage(newImage);
     }
 
-    private async saveImage(image: Buffer): Promise<string>{
+    private async saveImage(image: Buffer): Promise<number>{
         const sum = this.cipherService.getSum(image);
         const dbImage = await this.prismaService.images.findUnique({
             where: {
@@ -25,19 +25,19 @@ export class ImagesService{
             },
         });
         if(dbImage)
-            return sum;
+            return dbImage.id;
         const path = `./images/${sum.substring(0, 2)}`;
         if(!fs.existsSync(path))
             fs.mkdirSync(path, {
                 recursive: true,
             });
         fs.writeFileSync(`./images/${sum.substring(0, 2)}/${sum}.webp`, image);
-        await this.prismaService.images.create({
+        const newImage = await this.prismaService.images.create({
             data: {
                 sum: sum,
             },
         });
-        return sum;
+        return newImage.id;
     }
 
     async loadImage(sum: string): Promise<Buffer | null>{
@@ -88,6 +88,6 @@ export class ImagesService{
     }
 
     private async resizeImage(image: Buffer, width: number, height: number): Promise<Buffer>{
-        return await sharp(image).resize(width, height).toBuffer();
+        return await sharp(image).resize(width, height, {fit: "cover"}).toBuffer();
     }
 }
