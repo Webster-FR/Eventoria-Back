@@ -49,6 +49,8 @@ export class AuthService{
     }
 
     async verifySession(sessionUuid: string, userAgent: string): Promise<number>{
+        if(sessionUuid === "undefined")
+            throw new UnauthorizedException("Session not found");
         const session = await this.prismaService.sessions.findFirst({
             where: {
                 uuid: sessionUuid,

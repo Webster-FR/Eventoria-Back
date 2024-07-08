@@ -10,6 +10,7 @@ import {CipherService} from "../misc/cipher.service";
 import {UserEntity} from "./models/entities/user.entity";
 import {EmailService} from "../misc/email.service";
 import {UserProfileEntity} from "./models/entities/user-profile.entity";
+import {EmailDisputeEntity} from "./models/entities/email-dispute.entity";
 
 @Injectable()
 export class UsersService{
@@ -267,5 +268,94 @@ export class UsersService{
                 }
             });
         });
+    }
+
+    async migrateEmail(userId: number, newEmail: string){
+        const emailSum = this.cipherService.getSum(newEmail);
+        const bannedEmail = await this.prismaService.bannedEmails.findFirst({
+            where: {
+                sum: emailSum,
+            }
+        });
+        if(bannedEmail)
+            throw new ForbiddenException("Email is banned");
+
+        const conflictingUser = await this.prismaService.users.findUnique({
+            where: {
+                email: newEmail,
+            }
+        });
+        if(conflictingUser)
+            throw new ConflictException("Email already used");
+
+        const currentUser = await this.prismaService.users.findUnique({
+            where: {
+                id: userId,
+            },
+            select: {
+                email: true,
+            }
+        });
+        const oldEmail = currentUser.email;
+        const oldEmailSum = this.cipherService.getSum(currentUser.email);
+
+        await this.prismaService.$transaction(async(tx) => {
+            const emailChange = await tx.emailChanges.create({
+                data: {
+                    uuid: this.cipherService.generateUuidV7(),
+                    user_id: userId,
+                    old_email_sum: oldEmailSum,
+                }
+            });
+            await tx.users.update({
+                where: {
+                    id: userId,
+                },
+                data: {
+                    email: newEmail,
+                    verified_at: null,
+                }
+            });
+            // Remove and re-send email confirmation OTP
+            await tx.otpVerifications.deleteMany({
+                where: {
+                    user_id: userId,
+                }
+            });
+            await this.emailService.sendEmail(oldEmail, "Email change", `Your email has been changed to ${newEmail}. Use the following uuid to open a dispute: ${emailChange.uuid}`);
+        });
+        await this.resendEmailConfirmation(userId);
+    }
+
+    async openEmailDispute(emailChangeUuid: string, context: string): Promise<EmailDisputeEntity>{
+        const emailChange = await this.prismaService.emailChanges.findFirst({
+            where: {
+                uuid: emailChangeUuid,
+            }
+        });
+        if(!emailChange)
+            throw new NotFoundException("Email change not found");
+        const conflictingEmailDispute = await this.prismaService.emailDisputes.findFirst({
+            where: {
+                email_change_uuid: emailChangeUuid,
+            }
+        });
+        if(conflictingEmailDispute)
+            throw new ConflictException("Dispute already opened");
+        const uuid = this.cipherService.generateUuidV7();
+        const emailDispute = await this.prismaService.emailDisputes.create({
+            data: {
+                uuid: uuid,
+                email_change_uuid: emailChangeUuid,
+                context,
+            }
+        });
+        return {
+            uuid: emailDispute.uuid,
+            emailChangeUuid: emailDispute.email_change_uuid,
+            context: emailDispute.context,
+            resolvedAt: emailDispute.resolved_at,
+            createdAt: emailDispute.created_at,
+        } as EmailDisputeEntity;
     }
 }

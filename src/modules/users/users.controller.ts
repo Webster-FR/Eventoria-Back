@@ -21,9 +21,11 @@ import {ConfigService} from "@nestjs/config";
 import {AuthGuard} from "../auth/guards/auth.guard";
 import {OtpDto} from "./models/dto/otp.dto";
 import {UsernameParamDto} from "./models/dto/username-param.dto";
-import {PasswordBodyDto} from "./models/dto/password-body.dto";
+import {ChangePasswordDto} from "./models/dto/change-password.dto";
 import {EmailBodyDto} from "./models/dto/email-body.dto";
 import {ResetPasswordDto} from "./models/dto/reset-password.dto";
+import {OpenDisputeDto} from "./models/dto/open-dispute.dto";
+import {EmailDisputeEntity} from "./models/entities/email-dispute.entity";
 
 @Controller("users")
 @ApiTags("Users")
@@ -37,7 +39,9 @@ export class UsersController{
     @Get("username/availability/:username")
     @ApiResponse({status: HttpStatus.OK, description: "Username available"})
     @ApiResponse({status: HttpStatus.CONFLICT, description: "Username already used"})
-    async checkUsernameAvailability(@Req() req: any, @Param() params: UsernameParamDto){
+    async checkUsernameAvailability(
+        @Param() params: UsernameParamDto
+    ){
         if(!await this.usersService.isUsernameAvailable(params.username))
             throw new ConflictException("Username already used");
     }
@@ -47,7 +51,11 @@ export class UsersController{
     @ApiResponse({status: HttpStatus.FORBIDDEN, description: "Banned email"})
     @ApiResponse({status: HttpStatus.BAD_REQUEST, description: "Some fields are wrong"})
     @ApiResponse({status: HttpStatus.CONFLICT, description: "Username or email already used"})
-    async registerUser(@Body() body: CreateUserDto, @Req() req: any, @Res({passthrough: true}) res: FastifyReply){
+    async registerUser(
+        @Req() req: any,
+        @Res({passthrough: true}) res: FastifyReply,
+        @Body() body: CreateUserDto
+    ){
         const user = await this.usersService.createUser(body.username, body.email, body.password, body.displayName);
         const userAgent = req.headers["user-agent"];
         const sessionUUID = await this.authService.createSessionByUserId(user.id, userAgent, false);
@@ -89,8 +97,12 @@ export class UsersController{
     @UseGuards(AuthGuard)
     @ApiResponse({status: HttpStatus.NO_CONTENT, description: "Password changed"})
     @ApiResponse({status: HttpStatus.UNAUTHORIZED, description: "Authentication required"})
-    async changePassword(@Req() req: any, @Body() body: PasswordBodyDto){
+    async changePassword(@Req() req: any, @Res() res: FastifyReply, @Body() body: ChangePasswordDto){
         await this.usersService.changePassword(req.user.id, body.password);
+        if(body.logout){
+            await this.authService.invalidateUserSessions(req.user.id);
+            res.clearCookie("session");
+        }
     }
 
     @Post("password/reset/request")
@@ -107,4 +119,21 @@ export class UsersController{
         await this.usersService.resetPassword(body.otp, body.password);
     }
 
+    @Post("email/migrate")
+    @UseGuards(AuthGuard)
+    @ApiResponse({status: HttpStatus.NO_CONTENT, description: "Email migrated"})
+    @ApiResponse({status: HttpStatus.UNAUTHORIZED, description: "Authentication required"})
+    async migrateEmail(@Req() req: any, @Res() res: FastifyReply, @Body() body: EmailBodyDto){
+        await this.usersService.migrateEmail(req.user.id, body.email);
+        await this.authService.invalidateUserSessions(req.user.id);
+        res.clearCookie("session");
+    }
+
+    @Post("email/migrate/dispute")
+    @ApiResponse({status: HttpStatus.OK, description: "Email migration dispute sent", type: EmailDisputeEntity})
+    @ApiResponse({status: HttpStatus.NOT_FOUND, description: "Email change not found"})
+    @ApiResponse({status: HttpStatus.CONFLICT, description: "Email change already disputed"})
+    async openEmailDispute(@Body() body: OpenDisputeDto): Promise<EmailDisputeEntity>{
+        return await this.usersService.openEmailDispute(body.otp, body.context);
+    }
 }

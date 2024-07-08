@@ -39,12 +39,7 @@ export class AuthController{
     async logout(@Req() request: any, @Res({passthrough: true}) res: FastifyReply){
         const sessionUUID = request.cookies.session;
         await this.authService.invalidateSession(request.user.id, sessionUUID);
-        res.clearCookie("session", {
-            httpOnly: true,
-            sameSite: "lax",
-            secure: this.configService.get("SECURE_COOKIE") === "true",
-            path: "/",
-        });
+        res.clearCookie("session");
     }
 
     @Post("logout/all")
@@ -53,12 +48,7 @@ export class AuthController{
     @ApiResponse({status: HttpStatus.NO_CONTENT, description: "Logout successful"})
     async logoutAll(@Req() request: any, @Res({passthrough: true}) res: FastifyReply){
         await this.authService.invalidateUserSessions(request.user.id);
-        res.clearCookie("session", {
-            httpOnly: true,
-            sameSite: "strict",
-            secure: this.configService.get("SECURE_COOKIE") === "true",
-            path: "/" + this.configService.get("PREFIX"),
-        });
+        res.clearCookie("session");
     }
 
 }
