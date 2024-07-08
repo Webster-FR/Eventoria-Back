@@ -20,9 +20,9 @@ export class AuthController{
         const sessionUUID = await this.authService.createSession(body.email, body.password, userAgent, body.remember);
         res.setCookie("session", sessionUUID, {
             httpOnly: true,
-            sameSite: "strict",
+            sameSite: "lax",
             secure: this.configService.get("SECURE_COOKIE") === "true",
-            path: "/" + this.configService.get("PREFIX"),
+            path: "/",
         });
     }
 
@@ -35,9 +35,9 @@ export class AuthController{
         await this.authService.invalidateSession(request.user.id, sessionUUID);
         res.clearCookie("session", {
             httpOnly: true,
-            sameSite: "strict",
+            sameSite: "lax",
             secure: this.configService.get("SECURE_COOKIE") === "true",
-            path: "/" + this.configService.get("PREFIX"),
+            path: "/",
         });
     }
 

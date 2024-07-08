@@ -9,6 +9,8 @@ export class UserEntity{
     @ApiProperty()
         email: string;
     @ApiProperty()
+        admin: boolean;
+    @ApiProperty()
         verified: boolean;
     @ApiProperty()
         createdAt: Date;
