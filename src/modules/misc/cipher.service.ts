@@ -1,6 +1,7 @@
 import {Injectable} from "@nestjs/common";
 import * as crypto from "crypto";
 import * as argon2 from "argon2";
+import * as uuid from "uuid";
 
 
 @Injectable()
@@ -106,8 +107,18 @@ export class CipherService{
             }, buffer).toString("utf-8");
     }
 
-    // Secret functions
-    generateSecret(length = 32){
-        return crypto.randomBytes(length).toString("hex");
+    generateRandomBytes(bytesNumber = 32){
+        return crypto.randomBytes(bytesNumber).toString("hex");
+    }
+
+    generateRandomNumbers(numbersNumber = 6){
+        let numbers = "";
+        for(let i = 0; i < numbersNumber; i++)
+            numbers += Math.floor(Math.random() * 10);
+        return numbers;
+    }
+
+    generateUuidV7(){
+        return uuid.v7();
     }
 }

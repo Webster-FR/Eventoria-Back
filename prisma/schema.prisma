@@ -13,17 +13,27 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model BannedEmails {
+  sum    String  @id @db.VarChar(64)
+  reason String?
+
+  @@map("banned_emails")
+}
+
 model Users {
-  id           Int           @id @default(autoincrement())
-  username     String        @unique
-  email        String        @unique
-  admin        Boolean       @default(false)
-  password     String
-  verified_at  DateTime?
-  created_at   DateTime      @default(now())
-  updated_at   DateTime      @updatedAt
-  user_profile UserProfiles?
-  sessions     Sessions[]
+  id                       Int                     @id @default(autoincrement())
+  username                 String                  @unique @db.VarChar(24)
+  email                    String                  @unique
+  admin                    Boolean                 @default(false)
+  password                 String
+  verified_at              DateTime?
+  created_at               DateTime                @default(now())
+  updated_at               DateTime                @updatedAt
+  user_profile             UserProfiles?
+  otp_verification         OtpVerifications?
+  password_change_requests PasswordChangeRequests?
+  sessions                 Sessions[]
+  email_changes            EmailChanges[]
 
   @@map("users")
 }
@@ -31,7 +41,8 @@ model Users {
 model UserProfiles {
   user_id      Int     @id
   user         Users   @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  display_name String
+  display_name String  @db.VarChar(32)
+  bio          String?
   avatar_id    Int?
   avatar       Images? @relation(fields: [avatar_id], references: [id], onDelete: SetNull)
   instagram    String?
@@ -41,8 +52,48 @@ model UserProfiles {
   @@map("user_profiles")
 }
 
+model OtpVerifications {
+  user_id    Int      @id
+  user       Users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  otp        String   @db.VarChar(6)
+  expires_at DateTime
+
+  @@map("otp_verifications")
+}
+
+model PasswordChangeRequests {
+  user_id    Int      @id
+  user       Users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  otp        String   @unique @db.Uuid
+  expires_at DateTime
+
+  @@map("password_change_requests")
+}
+
+model EmailChanges {
+  uuid          String         @id @db.Uuid
+  user_id       Int
+  user          Users          @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  old_email_sum String         @db.VarChar(64)
+  email_dispute EmailDisputes?
+  created_at    DateTime       @default(now())
+
+  @@map("email_changes")
+}
+
+model EmailDisputes {
+  uuid              String       @id @db.Uuid
+  email_change_uuid String       @unique @db.Uuid
+  email_change      EmailChanges @relation(fields: [email_change_uuid], references: [uuid], onDelete: Cascade)
+  context           String
+  resolved_at       DateTime?
+  created_at        DateTime     @default(now())
+
+  @@map("email_disputes")
+}
+
 model Sessions {
-  uuid       String   @id
+  uuid       String   @id @db.Uuid
   user_id    Int
   user       Users    @relation(fields: [user_id], references: [id], onDelete: Cascade)
   user_agent String
@@ -53,13 +104,8 @@ model Sessions {
 
 model Images {
   id            Int            @id @default(autoincrement())
-  sum           String         @unique
-  image_type    ImageType
+  sum           String         @unique @db.VarChar(64)
   user_profiles UserProfiles[]
 
   @@map("images")
-}
-
-enum ImageType {
-  AVATAR
 }
