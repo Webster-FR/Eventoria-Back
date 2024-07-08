@@ -42,4 +42,14 @@ export class ProfileService{
         });
     }
 
+    async changeBio(userId: number, bio: string){
+        await this.prismaService.userProfiles.update({
+            where: {
+                user_id: userId,
+            },
+            data: {
+                bio,
+            }
+        });
+    }
 }
