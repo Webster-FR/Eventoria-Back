@@ -1,4 +1,16 @@
-import {Body, ConflictException, Controller, Get, HttpStatus, Param, Post, Req, Res, UseGuards} from "@nestjs/common";
+import {
+    Body,
+    ConflictException,
+    Controller,
+    Get,
+    HttpStatus,
+    Param,
+    Patch,
+    Post,
+    Req,
+    Res,
+    UseGuards
+} from "@nestjs/common";
 import {ApiResponse, ApiTags} from "@nestjs/swagger";
 import {UsersService} from "./users.service";
 import {CreateUserDto} from "./models/dto/create-user.dto";
@@ -9,6 +21,9 @@ import {ConfigService} from "@nestjs/config";
 import {AuthGuard} from "../auth/guards/auth.guard";
 import {OtpDto} from "./models/dto/otp.dto";
 import {UsernameParamDto} from "./models/dto/username-param.dto";
+import {PasswordBodyDto} from "./models/dto/password-body.dto";
+import {EmailBodyDto} from "./models/dto/email-body.dto";
+import {ResetPasswordDto} from "./models/dto/reset-password.dto";
 
 @Controller("users")
 @ApiTags("Users")
@@ -68,6 +83,28 @@ export class UsersController{
     @ApiResponse({status: HttpStatus.UNAUTHORIZED, description: "Authentication required"})
     async resendEmailConfirmation(@Req() req: any){
         await this.usersService.resendEmailConfirmation(req.user.id);
+    }
+
+    @Patch("password")
+    @UseGuards(AuthGuard)
+    @ApiResponse({status: HttpStatus.NO_CONTENT, description: "Password changed"})
+    @ApiResponse({status: HttpStatus.UNAUTHORIZED, description: "Authentication required"})
+    async changePassword(@Req() req: any, @Body() body: PasswordBodyDto){
+        await this.usersService.changePassword(req.user.id, body.password);
+    }
+
+    @Post("password/reset/request")
+    @ApiResponse({status: HttpStatus.NO_CONTENT, description: "Password reset requested"})
+    @ApiResponse({status: HttpStatus.NOT_FOUND, description: "User not found"})
+    async requestPasswordReset(@Body() body: EmailBodyDto){
+        await this.usersService.requestPasswordReset(body.email);
+    }
+
+    @Post("password/reset")
+    @ApiResponse({status: HttpStatus.NO_CONTENT, description: "Password reset"})
+    @ApiResponse({status: HttpStatus.BAD_REQUEST, description: "Invalid otp"})
+    async resetPassword(@Body() body: ResetPasswordDto){
+        await this.usersService.resetPassword(body.otp, body.password);
     }
 
 }

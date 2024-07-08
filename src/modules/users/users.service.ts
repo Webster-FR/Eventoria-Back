@@ -198,7 +198,7 @@ export class UsersService{
         });
     }
 
-    async changeUserPassword(userId: number, newPassword: string){
+    async changePassword(userId: number, newPassword: string){
         const passwordHash = await this.cipherService.hash(newPassword);
         await this.prismaService.users.update({
             where: {
@@ -210,10 +210,10 @@ export class UsersService{
         });
     }
 
-    async requestPasswordReset(userId: number){
+    async requestPasswordReset(email: string){
         const user = await this.prismaService.users.findUnique({
             where: {
-                id: userId,
+                email,
             }
         });
         if(!user)
@@ -223,7 +223,7 @@ export class UsersService{
         await this.prismaService.$transaction(async(tx) => {
             await tx.passwordChangeRequests.create({
                 data: {
-                    user_id: userId,
+                    user_id: user.id,
                     otp: resetUuid,
                     expires_at: new Date(Date.now() + 1000 * 60 * 15), // 15 minutes
                 }
