@@ -197,4 +197,75 @@ export class UsersService{
             }
         });
     }
+
+    async changeUserPassword(userId: number, newPassword: string){
+        const passwordHash = await this.cipherService.hash(newPassword);
+        await this.prismaService.users.update({
+            where: {
+                id: userId,
+            },
+            data: {
+                password: passwordHash,
+            }
+        });
+    }
+
+    async requestPasswordReset(userId: number){
+        const user = await this.prismaService.users.findUnique({
+            where: {
+                id: userId,
+            }
+        });
+        if(!user)
+            throw new NotFoundException("User not found");
+
+        const resetUuid = this.cipherService.generateUuidV7();
+        await this.prismaService.$transaction(async(tx) => {
+            await tx.passwordChangeRequests.create({
+                data: {
+                    user_id: userId,
+                    otp: resetUuid,
+                    expires_at: new Date(Date.now() + 1000 * 60 * 15), // 15 minutes
+                }
+            });
+
+            await this.emailService.sendEmail(user.email, "Password reset", `Your password reset token is ${resetUuid}`);
+        });
+    }
+
+    async resetPassword(otp: string, newPassword: string){
+        const passwordChangeRequest = await this.prismaService.passwordChangeRequests.findFirst({
+            where: {
+                otp,
+            }
+        });
+        if(!passwordChangeRequest)
+            throw new BadRequestException("Invalid OTP");
+        if(passwordChangeRequest.expires_at < new Date()){
+            await this.prismaService.passwordChangeRequests.delete({
+                where: {
+                    otp,
+                }
+            });
+            throw new ForbiddenException("OTP expired");
+        }
+
+        const passwordHash = await this.cipherService.hash(newPassword);
+        await this.prismaService.$transaction(async(tx) => {
+            await tx.passwordChangeRequests.delete({
+                where: {
+                    otp,
+                }
+            });
+
+            await tx.users.update({
+                where: {
+                    id: passwordChangeRequest.user_id,
+                },
+                data: {
+                    password: passwordHash,
+                }
+            });
+        });
+    }
 }
