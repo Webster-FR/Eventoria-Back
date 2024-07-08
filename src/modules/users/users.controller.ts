@@ -20,7 +20,7 @@ import {AuthService} from "../auth/auth.service";
 import {ConfigService} from "@nestjs/config";
 import {AuthGuard} from "../auth/guards/auth.guard";
 import {OtpDto} from "./models/dto/otp.dto";
-import {UsernameParamDto} from "./models/dto/username-param.dto";
+import {UsernameDto} from "./models/dto/username.dto";
 import {ChangePasswordDto} from "./models/dto/change-password.dto";
 import {EmailBodyDto} from "./models/dto/email-body.dto";
 import {ResetPasswordDto} from "./models/dto/reset-password.dto";
@@ -40,7 +40,7 @@ export class UsersController{
     @ApiResponse({status: HttpStatus.OK, description: "Username available"})
     @ApiResponse({status: HttpStatus.CONFLICT, description: "Username already used"})
     async checkUsernameAvailability(
-        @Param() params: UsernameParamDto
+        @Param() params: UsernameDto
     ){
         if(!await this.usersService.isUsernameAvailable(params.username))
             throw new ConflictException("Username already used");
@@ -141,7 +141,17 @@ export class UsersController{
     @ApiResponse({status: HttpStatus.OK, description: "User found", type: UserEntity})
     @ApiResponse({status: HttpStatus.NOT_FOUND, description: "User not found"})
     @ApiResponse({status: HttpStatus.BAD_REQUEST, description: "Invalid username"})
-    async getUserByUsername(@Param() params: UsernameParamDto): Promise<UserEntity>{
+    async getUserByUsername(@Param() params: UsernameDto): Promise<UserEntity>{
         return await this.usersService.getUserByUsername(params.username);
+    }
+
+    @Patch("username")
+    @UseGuards(AuthGuard)
+    @ApiResponse({status: HttpStatus.NO_CONTENT, description: "Username changed"})
+    @ApiResponse({status: HttpStatus.UNAUTHORIZED, description: "Authentication required"})
+    @ApiResponse({status: HttpStatus.CONFLICT, description: "Username already used"})
+    @ApiResponse({status: HttpStatus.BAD_REQUEST, description: "Username is invalid"})
+    async changeUsername(@Req() req: any, @Body() body: UsernameDto){
+        await this.usersService.changeUsername(req.user.id, body.username);
     }
 }

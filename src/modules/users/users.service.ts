@@ -391,4 +391,17 @@ export class UsersService{
             createdAt: emailDispute.created_at,
         } as EmailDisputeEntity;
     }
+
+    async changeUsername(userId: number, username: string){
+        if(!await this.isUsernameAvailable(username))
+            throw new ConflictException("Username already taken");
+        await this.prismaService.users.update({
+            where: {
+                id: userId,
+            },
+            data: {
+                username,
+            }
+        });
+    }
 }
