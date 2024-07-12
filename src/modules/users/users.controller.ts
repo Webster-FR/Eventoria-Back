@@ -11,7 +11,7 @@ import {
     Res,
     UseGuards
 } from "@nestjs/common";
-import {ApiResponse, ApiTags} from "@nestjs/swagger";
+import {ApiBearerAuth, ApiResponse, ApiTags} from "@nestjs/swagger";
 import {UsersService} from "./users.service";
 import {CreateUserDto} from "./models/dto/create-user.dto";
 import {UserEntity} from "./models/entities/user.entity";
@@ -26,6 +26,7 @@ import {EmailBodyDto} from "./models/dto/email-body.dto";
 import {ResetPasswordDto} from "./models/dto/reset-password.dto";
 import {OpenDisputeDto} from "./models/dto/open-dispute.dto";
 import {EmailDisputeEntity} from "./models/entities/email-dispute.entity";
+import {AuthEntity} from "./models/entities/auth.entity";
 
 @Controller("users")
 @ApiTags("Users")
@@ -47,7 +48,7 @@ export class UsersController{
     }
 
     @Post("register")
-    @ApiResponse({status: HttpStatus.CREATED, description: "User created", type: UserEntity})
+    @ApiResponse({status: HttpStatus.CREATED, description: "User created", type: AuthEntity})
     @ApiResponse({status: HttpStatus.FORBIDDEN, description: "Banned email"})
     @ApiResponse({status: HttpStatus.BAD_REQUEST, description: "Some fields are wrong"})
     @ApiResponse({status: HttpStatus.CONFLICT, description: "Username or email already used"})
@@ -59,17 +60,15 @@ export class UsersController{
         const user = await this.usersService.createUser(body.username, body.email, body.password, body.displayName);
         const userAgent = req.headers["user-agent"];
         const sessionUUID = await this.authService.createSessionByUserId(user.id, userAgent, false);
-        res.setCookie("session", sessionUUID, {
-            httpOnly: true,
-            sameSite: "strict",
-            secure: this.configService.get("SECURE_COOKIE") === "true",
-            path: "/" + this.configService.get("PREFIX"),
-        });
-        res.send(user);
+        return {
+            user,
+            token: sessionUUID,
+        } as AuthEntity;
     }
 
     @Get("me")
     @UseGuards(AuthGuard)
+    @ApiBearerAuth()
     @ApiResponse({status: HttpStatus.OK, description: "User found", type: UserEntity})
     @ApiResponse({status: HttpStatus.UNAUTHORIZED, description: "Authentication required"})
     async getMe(@Req() req: any): Promise<UserEntity>{
@@ -78,6 +77,7 @@ export class UsersController{
 
     @Post("email/confirm")
     @UseGuards(AuthGuard)
+    @ApiBearerAuth()
     @ApiResponse({status: HttpStatus.NO_CONTENT, description: "Email confirmed"})
     @ApiResponse({status: HttpStatus.BAD_REQUEST, description: "Invalid otp"})
     @ApiResponse({status: HttpStatus.UNAUTHORIZED, description: "Authentication required"})
@@ -87,6 +87,7 @@ export class UsersController{
 
     @Post("email/confirm/resend")
     @UseGuards(AuthGuard)
+    @ApiBearerAuth()
     @ApiResponse({status: HttpStatus.NO_CONTENT, description: "Email confirmation resent"})
     @ApiResponse({status: HttpStatus.UNAUTHORIZED, description: "Authentication required"})
     async resendEmailConfirmation(@Req() req: any){
@@ -95,6 +96,7 @@ export class UsersController{
 
     @Patch("password")
     @UseGuards(AuthGuard)
+    @ApiBearerAuth()
     @ApiResponse({status: HttpStatus.NO_CONTENT, description: "Password changed"})
     @ApiResponse({status: HttpStatus.UNAUTHORIZED, description: "Authentication required"})
     async changePassword(@Req() req: any, @Res() res: FastifyReply, @Body() body: ChangePasswordDto){
@@ -121,6 +123,7 @@ export class UsersController{
 
     @Post("email/migrate")
     @UseGuards(AuthGuard)
+    @ApiBearerAuth()
     @ApiResponse({status: HttpStatus.NO_CONTENT, description: "Email migrated"})
     @ApiResponse({status: HttpStatus.UNAUTHORIZED, description: "Authentication required"})
     async migrateEmail(@Req() req: any, @Res() res: FastifyReply, @Body() body: EmailBodyDto){
@@ -147,6 +150,7 @@ export class UsersController{
 
     @Patch("username")
     @UseGuards(AuthGuard)
+    @ApiBearerAuth()
     @ApiResponse({status: HttpStatus.NO_CONTENT, description: "Username changed"})
     @ApiResponse({status: HttpStatus.UNAUTHORIZED, description: "Authentication required"})
     @ApiResponse({status: HttpStatus.CONFLICT, description: "Username already used"})
