@@ -25,7 +25,7 @@ export class AuthController{
         const userAgent = req.headers["user-agent"];
         const {sessionUuid, userId} = await this.authService.createSession(body.email, body.password, userAgent, body.remember);
         res.setCookie("session", sessionUuid, {
-            httpOnly: true,
+            httpOnly: this.configService.get("HTTP_ONLY_COOKIE") === "true",
             sameSite: "lax",
             secure: this.configService.get("SECURE_COOKIE") === "true",
             path: "/",
