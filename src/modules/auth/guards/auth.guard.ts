@@ -11,7 +11,15 @@ export class AuthGuard implements CanActivate{
 
     async canActivate(context: ExecutionContext): Promise<boolean>{
         const request = context.switchToHttp().getRequest();
-        const sessionUUID = request.cookies.session;
+        let sessionUUID = request.cookies.session;
+        if(!sessionUUID){
+            const authHeader = request.headers.authorization;
+            if(!authHeader)
+                throw new UnauthorizedException("No session provided");
+            if(!authHeader.startsWith("Bearer "))
+                throw new UnauthorizedException("Incorrect bearer token");
+            sessionUUID = authHeader.split(" ")[1];
+        }
         if(!sessionUUID)
             throw new UnauthorizedException("No session provided");
         const userAgent = request.headers["user-agent"];

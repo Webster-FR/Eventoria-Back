@@ -8,7 +8,7 @@ import {
     UseGuards,
     UseInterceptors
 } from "@nestjs/common";
-import {ApiBody, ApiConsumes, ApiResponse, ApiTags} from "@nestjs/swagger";
+import {ApiBearerAuth, ApiBody, ApiConsumes, ApiResponse, ApiTags} from "@nestjs/swagger";
 import {ProfileService} from "./profile.service";
 import {FileInterceptor} from "@nest-lab/fastify-multer";
 import {AuthGuard} from "../auth/guards/auth.guard";
@@ -25,6 +25,7 @@ export class ProfileController{
 
     @Patch("avatar")
     @UseGuards(AuthGuard)
+    @ApiBearerAuth()
     @ApiConsumes("multipart/form-data")
     @UseInterceptors(FileInterceptor("file", {
         limits: {
@@ -62,6 +63,7 @@ export class ProfileController{
 
     @Patch("display-name")
     @UseGuards(AuthGuard)
+    @ApiBearerAuth()
     @ApiResponse({status: HttpStatus.OK, description: "Display name updated"})
     @ApiResponse({status: HttpStatus.UNAUTHORIZED, description: "Authentication required"})
     @ApiResponse({status: HttpStatus.BAD_REQUEST, description: "Display name is invalid"})
@@ -74,6 +76,7 @@ export class ProfileController{
 
     @Patch("bio")
     @UseGuards(AuthGuard)
+    @ApiBearerAuth()
     @ApiResponse({status: HttpStatus.OK, description: "Bio updated"})
     @ApiResponse({status: HttpStatus.UNAUTHORIZED, description: "Authentication required"})
     @ApiResponse({status: HttpStatus.BAD_REQUEST, description: "Bio is invalid"})
@@ -86,6 +89,7 @@ export class ProfileController{
 
     @Put("socials")
     @UseGuards(AuthGuard)
+    @ApiBearerAuth()
     @ApiResponse({status: HttpStatus.OK, description: "Socials updated"})
     @ApiResponse({status: HttpStatus.UNAUTHORIZED, description: "Authentication required"})
     @ApiResponse({status: HttpStatus.BAD_REQUEST, description: "Socials are invalid"})
